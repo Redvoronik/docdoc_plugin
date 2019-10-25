@@ -1,54 +1,46 @@
 <?php
-
-
-
 class Docdoc
 {
-   
+    private $username;
+    private $password;
+
     function __construct() {
-        Transport::setInstance([
-            'username' => get_option('username'),
-            'password' => get_option('password')
-        ]);
+        $this->username = get_option('username');
+        $this->password = get_option('password');
     }
     
-    public function actionCities()
+    public function cityList()
     {
-        $req = new CityListRequest();
-        $cities = self::getAttributesToArray($req->getData());
-
-        return json_encode($cities);
+        return $this->sendRequest('city');
     }
 
-    public function actionSpecialisations(int $id)
+    public function specialisations($cityId = null)
     {
-        $req = new SpecListRequest(['city' => $id]);
-        $specs = self::getAttributesToArray($req->getData());
-
-        return json_encode($specs);
+        $requestString = 'speciality/';
+        $requestString = $cityId ? $requestString . "city/{$cityId}/" : $requestString;
+        return $this->sendRequest($requestString);
     }
 
-    public function actionDistrict(int $id)
+    public function district($cityId)
     {
-        $req = new DistrictListRequest(['city' => $id]);
-        $districts = self::getAttributesToArray($req->getData());
-
-        return json_encode($districts);
+        return $this->sendRequest("district/city/{$cityId}");
     }
 
-    private static function getAttributesToArray(array $objects)
+    private function endPoint()
     {
-        $attributes = $objects[0]->attributes();
-        $result = [];
+        return "https://{$this->username}:{$this->password}@back.docdoc.ru/api/rest/1.0.6/json/";
+    }
 
-        foreach ($objects as $key => $obj) {
-            $tmp = null;
-            foreach ($attributes as $attribute) {
-                 $tmp[$attribute] = $obj->getAttribute($attribute);
-            }
-            $result[] = $tmp;
-        }
+    private function sendRequest($query)
+    {
+        $url = $this->endPoint() . $query;
 
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'IE20');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        
         return $result;
     }
 }

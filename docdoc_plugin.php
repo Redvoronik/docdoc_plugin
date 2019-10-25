@@ -24,7 +24,6 @@ function createLinkOnMainMenuDoc()
     );
 }
 
-
 add_action('rest_api_init', function () {
   register_rest_route( 'doctor', 'cities',array(
                 'methods'  => 'GET',
@@ -33,31 +32,30 @@ add_action('rest_api_init', function () {
 });
 
 add_action('rest_api_init', function () {
-  register_rest_route( 'doctor', 'specialisations',array(
+  register_rest_route( 'doctor', 'specialisations/(?P<city_id>\d+)',array(
                 'methods'  => 'GET',
                 'callback' => 'getSpecialisations'
       ));
 });
 
 add_action('rest_api_init', function () {
-  register_rest_route( 'doctor', 'district',array(
+  register_rest_route( 'doctor', 'district/(?P<city_id>\d+)',array(
                 'methods'  => 'GET',
                 'callback' => 'getDistrict'
       ));
 });
 
-
 function getCities() {
-
-    $test = new Docdoc();
-
-    return $test;
+    $docdoc = new Docdoc();
+    return $docdoc->cityList();
 }
 
-function getSpecialisations() {
-    return 1;
+function getSpecialisations($data) {
+    $docdoc = new Docdoc();
+    return $docdoc->specialisations($data['city_id']);
 }
 
-function getDistrict() {
-    return 1;
+function getDistrict($data) {
+    $docdoc = new Docdoc();
+    return $docdoc->district($data['city_id']);
 }
